@@ -4,6 +4,7 @@ import { push } from "react-router-redux";
 import { Table, Pagination } from "react-bootstrap";
 import UserListElement from "./UserListElement";
 import UserDeletePrompt from "./UserDeletePrompt";
+import SocialButton from "../SocialButton";
 
 // User list component
 export class UserList extends React.Component {
@@ -14,7 +15,7 @@ export class UserList extends React.Component {
     // default ui local state
     this.state = {
       delete_show: false,
-      delete_user: {},
+      delete_user: {}
     };
 
     // bind <this> to the event method
@@ -22,13 +23,23 @@ export class UserList extends React.Component {
     this.showDelete = this.showDelete.bind(this);
     this.hideDelete = this.hideDelete.bind(this);
     this.userDelete = this.userDelete.bind(this);
+    this.handleSocialLoginFailure = this.handleSocialLoginFailure.bind(this);
+    this.handleSocialLogin = this.handleSocialLogin.bind(this);
+  }
+
+  handleSocialLogin(user) {
+    console.log("bien", user);
+  }
+
+  handleSocialLoginFailure(err) {
+    console.error("error", err);
   }
 
   // render
   render() {
     // pagination
-    const {users, page} = this.props;
-    const per_page = 10;
+    const { users, page } = this.props;
+    const per_page = users.data;
     const pages = Math.ceil(users.length / per_page);
     const start_offset = (page - 1) * per_page;
     let start_count = 0;
@@ -36,40 +47,70 @@ export class UserList extends React.Component {
     // show the list of users
     return (
       <div>
+        <div>
+          <SocialButton
+            provider="facebook"
+            appId="604847433336808"
+            onLoginSuccess={this.handleSocialLogin}
+            onLoginFailure={this.handleSocialLoginFailure}
+          >
+            Login with Facebook
+          </SocialButton>
+        </div>
+
         <Table bordered hover responsive striped>
           <thead>
-          <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Job</th>
-            <th>Edit</th>
-            <th>Delete</th>
-          </tr>
+            <tr>
+              <th>ID</th>
+              <th>FirstName</th>
+              <th>Email</th>
+              <th>Edit</th>
+              <th>Delete</th>
+            </tr>
           </thead>
           <tbody>
-          {users.map((user, index) => {
-            if (index >= start_offset && start_count < per_page) {
-              start_count++;
-              return (
-                <UserListElement key={index} user={user} showDelete={this.showDelete}/>
-              );
-            }
-          })}
+            {users.data.map((user, index) => {
+              if (index >= start_offset && start_count < per_page) {
+                start_count++;
+                return (
+                  <UserListElement
+                    key={index}
+                    user={user}
+                    showDelete={this.showDelete}
+                  />
+                );
+              }
+            })}
           </tbody>
         </Table>
 
-        <Pagination className="users-pagination pull-right" bsSize="medium" maxButtons={10} first last next
-          prev boundaryLinks items={pages} activePage={page} onSelect={this.changePage}/>
+        <Pagination
+          className="users-pagination pull-right"
+          bsSize="medium"
+          maxButtons={10}
+          first
+          last
+          next
+          prev
+          boundaryLinks
+          items={pages}
+          activePage={page}
+          onSelect={this.changePage}
+        />
 
-        <UserDeletePrompt show={this.state.delete_show} user={this.state.delete_user}
-          hideDelete={this.hideDelete} userDelete={this.userDelete}/>
+        <UserDeletePrompt
+          show={this.state.delete_show}
+          user={this.state.delete_user}
+          hideDelete={this.hideDelete}
+          userDelete={this.userDelete}
+        />
       </div>
     );
   }
 
   // change the user lists' current page
   changePage(page) {
-    this.props.dispatch(push('/?page=' + page));
+    this.props.dispatch(push("/?page=" + page));
   }
 
   // show the delete user prompt
@@ -77,7 +118,7 @@ export class UserList extends React.Component {
     // change the local ui state
     this.setState({
       delete_show: true,
-      delete_user: user,
+      delete_user: user
     });
   }
 
@@ -86,7 +127,7 @@ export class UserList extends React.Component {
     // change the local ui state
     this.setState({
       delete_show: false,
-      delete_user: {},
+      delete_user: {}
     });
   }
 
@@ -94,8 +135,8 @@ export class UserList extends React.Component {
   userDelete() {
     // delete the user
     this.props.dispatch({
-      type: 'USERS_DELETE',
-      user_id: this.state.delete_user.id,
+      type: "USERS_DELETE",
+      user_id: this.state.delete_user.id
     });
 
     // hide the prompt
@@ -105,9 +146,10 @@ export class UserList extends React.Component {
 
 // export the connected class
 function mapStateToProps(state) {
+  console.log("state", state);
   return {
     users: state.users,
-    page: Number(state.routing.locationBeforeTransitions.query.page) || 1,
+    page: Number(state.routing.locationBeforeTransitions.query.page) || 1
   };
 }
 export default connect(mapStateToProps)(UserList);

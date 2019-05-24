@@ -10,8 +10,8 @@ export default class UserListElement extends React.Component {
     return (
       <tr>
         <td>#{user.id}</td>
-        <td>{user.username}</td>
-        <td>{user.job}</td>
+        <td>{user.first_name}</td>
+        <td>{user.email}</td>
         <td>
           <Link to={'user-edit/' + user.id}>
             <Button bsSize="xsmall">
